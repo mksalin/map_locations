@@ -18,134 +18,185 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
 
-  <script>
-    
-	/*
-	// Get user's location (This part requires user permission)
-    navigator.geolocation.getCurrentPosition(
-      function(position) {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+    <script>
+    const dataFileName = 'location_data.json';
+    const abstractApiKey = 'ae167c177de74fa8b25fffbd309a9e1c'; // **REPLACE with your Abstract API key**
 
-        console.log("Your Location:", latitude, longitude); // Log location to console
-
-        // Initialize the map centered on user's location
-        const map = L.map('map').setView([latitude, longitude], 13); 
-	
-		// Add a tile layer (OpenStreetMap)
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
-
-		// Add a marker for Helsinki
-		L.marker([60.1699, 24.9384])
-			.addTo(map)
-			.bindPopup("Helsinki");
-
-		// Add a marker for current location
-		L.marker([latitude, longitude])
-			.addTo(map)
-			.bindPopup("Current location");
-
-		var popup = L.popup();
-
-		function onMapClick(e) {
-			popup
-				.setLatLng(e.latlng)
-				.setContent("You clicked the map at " + e.latlng.toString())
-				.openOn(map);
-		}
-
-		map.on('click', onMapClick);
-      },
-      function(error) {
-        console.error("Error getting user's location:", error);
-        // Fallback: Center the map on Helsinki if geolocation fails
-        const map = L.map('map').setView([60.1699, 24.9384], 13); 
-
-        // Add the tile layer and markers as in the previous code
-        // ... (rest of the map initialization code) 
+    async function getUserIp() {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        console.log("IP Address fetched successfully:", data.ip);
+        return data.ip;
+      } catch (error) {
+        console.error("Error fetching IP address:", error);
+        return null;
       }
-    );
-*/
-    // Function to get user's location from IP address
-    function getUserLocation() {
-      fetch('https://api.ipify.org?format=json')
-        .then(response => response.json())
-        .then(data => {
-          const ipAddress = data.ip;
-          const ipApiUrl = `http://ip-api.com/json/${ipAddress}`;
-
-          fetch(ipApiUrl)
-            .then(response => response.json())
-            .then(data => {
-              if (data.status === 'success') {
-                const latitude = data.lat;
-                const longitude = data.lon;
-
-                // Initialize the map centered on user's location
-                const map = L.map('map').setView([latitude, longitude], 13); 
-
-                // Add a tile layer (OpenStreetMap)
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-
-				var LeafIcon = L.Icon.extend({
-					options: {
-						shadowUrl: 'leaf-shadow.png',
-						iconSize:     [20, 20],
-						shadowSize:   [50, 64],
-						iconAnchor:   [22, 94],
-						shadowAnchor: [4, 62],
-						popupAnchor:  [-3, -76]
-					}
-				});
-
-				var greenIcon = new LeafIcon({iconUrl: 'leaf-green.png'}),
-					redIcon = new LeafIcon({iconUrl: 'leaf-red.png'}),
-					orangeIcon = new LeafIcon({iconUrl: 'leaf-orange.png'});
-
-                // Add a marker for the user's location
-                L.marker([latitude, longitude], {icon: greenIcon})
-                  .addTo(map)
-                  .bindPopup(`Your Location:<br>IP: ${ipAddress}<br>Latitude: ${latitude}<br>Longitude: ${longitude}`)
-				  .openPopup();
-
-                // Add markers for Helsinki and Espoo
-                L.marker([60.1699, 24.9384], {icon: redIcon})
-                  .addTo(map)
-                  .bindPopup("Helsinki");
-
-                L.marker([60.2055, 24.6559], {icon: orangeIcon}) 
-                  .addTo(map)
-                  .bindPopup("Espoo"); 
-
-              } else {
-                console.error("Error getting location from IP address:", data.message);
-              }
-            })
-            .catch(error => {
-              console.error("Error fetching location data:", error);
-            });
-        })
-        .catch(error => {
-          console.error("Error fetching IP address:", error);
-        });
     }
 	
-	function getUserLocationBasedIP() {
-		// Add markers for Helsinki and Espoo
-		L.marker([60.2699, 24.9384])
-			.addTo(map)
-			.bindPopup("Helsinki 2");	
-			
-	}
-	
-    // Call the function to get user's location and initialize the map
-    getUserLocation();
-	getUserLocationBasedIP();	
-  </script>
+	  async function getUserLocationFromIP() {
+      try {
+        const ipAddress = await getUserIp();
+        if (ipAddress) {
+          const response = await fetch(`https://ipgeolocation.abstractapi.com/v1/?api_key=${abstractApiKey}&ip_address=${ipAddress}`);
+          const data = await response.json();
+          if (data && data.latitude && data.longitude) {
+            return { lat: data.latitude, lon: data.longitude };
+          } else {
+            console.error("Invalid response from Abstract API:", data);
+            throw new Error("Invalid response from Abstract API");
+          }
+        } else {
+          throw new Error("Could not determine IP address.");
+        }
+      } catch (error) {
+        console.error("Error getting user location from Abstract API:", error);
+        throw error;
+      }
+    }
+    async function getUserLocation__() {
+      try {
+        const ipAddress = await getUserIp();
+        if (ipAddress) {
+          const response = await fetch(`http://ip-api.com/json/${ipAddress}`);
+          const data = await response.json();
+          if (data.status === 'success' && data.lat && data.lon) {
+            console.log("User location fetched successfully:", data.lat, data.lon);
+            return { lat: data.lat, lon: data.lon };
+          } else {
+            throw new Error(`Error getting location from IP address: ${data.message || 'Invalid coordinates'}`);
+          }
+        } else {
+          throw new Error("Failed to get IP address.");
+        }
+      } catch (error) {
+        console.error("Error getting user location:", error);
+        throw error;
+      }
+    }
 
-  <p>Map should appear above this text.</p>
+    function getLocationFromBrowser() {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            resolve({ lat: position.coords.latitude, lon: position.coords.longitude });
+          },
+          error => {
+            reject(error);
+          }
+        );
+      });
+    }
+
+    function createMap(center) {
+      console.log("Map initialized with center:", center.lat, center.lon);
+      const map = L.map('map').setView(center || [60.1699, 24.9384], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      return map;
+    }
+
+    function addMarkersToMap(map, ipLocations, browserLocations) {
+	    const ipMarkers = L.featureGroup(); // Create a FeatureGroup for IP markers
+		const browserMarkers = L.featureGroup(); // Create a FeatureGroup for browser markers
+
+      ipLocations.forEach(loc => {
+        const marker = L.marker([loc.lat, loc.lon], {
+          icon: L.icon({
+            iconUrl: 'leaf-green.png', //'https://leafletjs.com/examples/custom-icons/leaf-red.png',
+            iconSize: [20, 20],
+            iconAnchor: [22, 94],
+            popupAnchor: [-3, -76]
+          })
+        }).bindPopup(`IP: ${loc.ip}, ${loc.date}`);
+		ipMarkers.addLayer(marker); // Add marker to the FeatureGroup
+      });
+      browserLocations.forEach(loc => {
+        const marker = L.marker([loc.lat, loc.lon], {
+          icon: L.icon({
+            iconUrl: 'leaf-red.png', //'https://leafletjs.com/examples/custom-icons/leaf-green.png',
+            iconSize: [20, 20],
+            iconAnchor: [22, 94],
+            popupAnchor: [-3, -76]
+          })
+        }).bindPopup(`Browser: ${loc.date}`);
+		browserMarkers.addLayer(marker); // Add marker to the FeatureGroup
+      });
+	  map.addLayer(ipMarkers); // Add the IP FeatureGroup to the map
+	  map.addLayer(browserMarkers); // Add the browser FeatureGroup to the map
+    }
+
+    async function initializeMap() {
+      let ipLocations = [];
+      let browserLocations = [];
+
+      try {
+        const response = await fetch(dataFileName);
+        if (response.ok) {
+          const existingData = await response.json();
+          ipLocations = existingData.ipLocations || [];
+          browserLocations = existingData.browserLocations || [];
+        }
+      } catch (error) {
+        console.warn("Error loading JSON file:", error);
+      }
+
+      try {
+        const ipLocation = await getUserLocationFromIP(); //getUserLocation();
+        if (ipLocation) {
+          const ipAddress = await getUserIp();
+          const newIpLocation = {
+            ip: ipAddress,
+            lat: ipLocation.lat,
+            lon: ipLocation.lon,
+            date: new Date().toISOString()
+          };
+          ipLocations.push(newIpLocation);
+        }
+      } catch (error) {
+        console.error("Error getting IP location:", error);
+      }
+
+      try {
+        const browserLocation = await getLocationFromBrowser();
+        if (browserLocation) {
+          browserLocations.push({
+            lat: browserLocation.lat,
+            lon: browserLocation.lon,
+            date: new Date().toISOString()
+          });
+        }
+      } catch (error) {
+        console.error("Error getting browser location:", error);
+      }
+
+      const mapCenter = ipLocations.length > 0 ? [ipLocations[0].lat, ipLocations[0].lon] : browserLocations.length > 0 ? [browserLocations[0].lat, browserLocations[0].lon] : [60.1699, 24.9384];
+      const map = createMap(mapCenter);
+      addMarkersToMap(map, ipLocations, browserLocations);
+
+      try {
+        const response = await fetch(dataFileName, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ ipLocations, browserLocations })
+        });
+        if (!response.ok) {
+          console.error("Failed to save JSON data", response.status);
+        }
+      } catch (error) {
+        console.error("Error saving JSON data:", error);
+      }
+
+    }
+
+    initializeMap();
+
+  </script>
 
 </body>
 </html>

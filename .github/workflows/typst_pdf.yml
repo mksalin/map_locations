@@ -55,9 +55,9 @@ jobs:
             
             # 👇 CRITICAL FIX: Ensure the input is first, followed by the -o flag and its value.
             # Using single quotes for the entire command can sometimes help resolve shell ambiguities.
-            # typst compile -- "$file" -o "$output_name"
+            # typst compile -- "$file" -- -o "$output_name"
             # Alternative: Place the -o flag before the input file
-            typst compile -- -o "$output_name" "$file"
+            # typst compile -- -o "$output_name" "$file"
             
             echo "Created $output_name"
           done

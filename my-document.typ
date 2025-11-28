@@ -6,7 +6,7 @@
 
 = The Typst Playground
 
-Welcome to the Typst Playground! This is a sandbox where you can experiment with Typst. You can type anywhere in the editor panel on the left. The preview panel to the right will update live.
+Welcome to the Typst Playground!! This is a sandbox where you can experiment with Typst. You can type anywhere in the editor panel on the left. The preview panel to the right will update live.
 
 = Basics <basics>
 

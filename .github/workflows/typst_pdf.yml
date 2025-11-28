@@ -95,18 +95,30 @@ jobs:
           mkdir pdf_dist
           mv *.pdf pdf_dist/
 
-      # 5. Commit the generated PDF files back to the repository
-      - name: 5. Deploy PDFs to gh-pages branch
+      # 5. Commit the generated PDF files back to the main branch
+      - name: 5. Deploy PDFs to Main Branch
         uses: peaceiris/actions-gh-pages@v3
         with:
-          # Use the default GitHub token for authentication
+          # Use the GITHUB_TOKEN which you previously granted 'contents: write' permission
           github_token: ${{ secrets.GITHUB_TOKEN }} 
-          # Specify the branch where the PDFs should be committed
-          publish_branch: pdf-output # 👈 CRITICAL: This is the new branch name
-          # Specify the folder to commit (the one we created in step 4)
+          
+          # 👇 CRITICAL CHANGE 1: Set the target branch to 'main'
+          publish_branch: main 
+          
+          # 👇 CRITICAL CHANGE 2: Define the target directory on the 'main' branch
+          # We'll use 'pdf-output' as a simple directory name
           publish_dir: pdf_dist 
-          # Specify a commit message
-          commit_message: ${{ github.event.head_commit.message }} [Actions] PDF build update
+          
+          # This ensures only the contents of 'pdf_dist' are committed to the target path.
+          # We need to tell the action NOT to overwrite the entire branch, 
+          # but just to place the files in a subfolder.
+          cname: '' # Must be set to an empty string to avoid CNAME issues on main branch
+          
+          # We commit to a SUBFOLDER of the main branch
+          destination_dir: pdf/
+          
+          # Define a clear commit message
+          commit_message: "Automated PDF update: Generated documents from Typst"
           
       # 4. Upload All Generated PDFs (This step is now correct)
       #- name: 4. Upload All Generated PDFs

@@ -49,11 +49,14 @@ jobs:
           for file in "${typst_files[@]}"; do
             echo "Compiling: $file"
             
-            # 👇 CRITICAL FIX: Use the -o flag to place the PDF in the root directory
-            # Example: docs/report.typ -> report.pdf (in the root)
+            # CRITICAL FIX: Ensure arguments are passed correctly.
+            # Use 'basename' to get the filename without the directory or extension, 
+            # then append .pdf to define the output file in the root directory.
             output_name=$(basename "$file" .typ).pdf
             
-            typst compile "$file" -o "$output_name"
+            # Pass the input file, then the -o flag, and finally the output name.
+            # Note: The quotes around the variables are essential.
+            typst compile -- "$file" -o "$output_name"
             
             echo "Created $output_name"
           done

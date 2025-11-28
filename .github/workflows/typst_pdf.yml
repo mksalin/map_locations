@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      # mod to comment only
       # 🔑 CRITICAL FIX: Include all files in the docs/ folder AND the root directory
       - 'docs/**' 
       - '**/*.typ' # Include all .typ files anywhere in the repo

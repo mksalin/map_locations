@@ -83,11 +83,31 @@ jobs:
             # If the command above fails, try the explicit -o flag
             # Note: We are only testing one command structure per run to get a clean error.
           done
+
+      # 4. Create an Artifact Directory (Optional, but clean)
+      - name: 4. Move PDFs to a Distribution Folder
+        # This moves all generated PDFs from the root to a dedicated 'pdf_dist' folder
+        run: |
+          mkdir pdf_dist
+          mv *.pdf pdf_dist/
+
+      # 5. Commit the generated PDF files back to the repository
+      - name: 5. Deploy PDFs to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # Use the default GitHub token for authentication
+          github_token: ${{ secrets.GITHUB_TOKEN }} 
+          # Specify the branch where the PDFs should be committed
+          publish_branch: pdf-output # 👈 CRITICAL: This is the new branch name
+          # Specify the folder to commit (the one we created in step 4)
+          publish_dir: pdf_dist 
+          # Specify a commit message
+          commit_message: ${{ github.event.head_commit.message }} [Actions] PDF build update
           
       # 4. Upload All Generated PDFs (This step is now correct)
-      - name: 4. Upload All Generated PDFs
-        uses: actions/upload-artifact@v4
-        with:
-          name: compiled-typst-pdfs 
-          # This now correctly finds the PDFs created in the root directory
-          path: '*.pdf'
+      #- name: 4. Upload All Generated PDFs
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: compiled-typst-pdfs 
+      #    # This now correctly finds the PDFs created in the root directory
+      #    path: '*.pdf'

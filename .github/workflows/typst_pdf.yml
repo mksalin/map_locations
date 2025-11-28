@@ -32,7 +32,7 @@ jobs:
         # This action installs the Typst command-line interface (CLI)
         uses: typst-community/setup-typst@v4
       
-      # 3. Compile ALL top-level .typ files in the docs/ folder
+      # 3. Compile All Documents (with Debug Prints)
       - name: 3. Compile All Documents
         run: |
           echo "Starting compilation of all .typ files in docs/..."
@@ -46,7 +46,7 @@ jobs:
           fi
           
           for file in "${typst_files[@]}"; do
-            echo "Compiling: $file"
+            echo "--- Debugging Compilation for: $file ---"
             
             # 1. Get ONLY the filename (e.g., 'my-new-doc.typ')
             base_filename=$(basename "$file")
@@ -54,12 +54,23 @@ jobs:
             # 2. Replace .typ with .pdf to get the output name (e.g., 'my-new-doc.pdf')
             output_name="${base_filename/.typ/.pdf}"
             
-            # 👇 CRITICAL FIX: Use the most robust command syntax: 
-            # typst compile <INPUT> -o <OUTPUT>
-            # We use the full path for the input ($file) and the simple filename for the output ($output_name).
-            typst compile "$file" -- -o "$output_name"
+            # DEBUG: Print the input and output variables
+            echo "DEBUG: Input file: '$file'"
+            echo "DEBUG: Output name: '$output_name'"
             
-            echo "Created $output_name in the root directory."
+            # The command we are trying to execute (Option 1: INPUT -o OUTPUT)
+            COMMAND="typst compile \"$file\" -o \"$output_name\""
+            echo "DEBUG: Executing command: $COMMAND"
+            
+            # CRITICAL FIX: Try the alternative syntax where OUTPUT is the final argument
+            # This is often the most reliable way to pass arguments to CLI tools.
+            # typst compile <INPUT> <OUTPUT>
+            typst compile "$file" "$output_name"
+            
+            echo "Compilation of $file completed successfully."
+            
+            # If the command above fails, try the explicit -o flag
+            # Note: We are only testing one command structure per run to get a clean error.
           done
           
       # 4. Upload All Generated PDFs (This step is now correct)

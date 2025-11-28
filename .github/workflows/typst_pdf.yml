@@ -1,42 +1,67 @@
-name: Build Typst PDF
+name: Compile All Typst Documents in Docs Folder
 
 on:
   push:
     branches:
-      - main  # Set this to your default branch name (e.g., main or master)
+      - main
     paths:
-      # ⚠️ Customize this list ⚠️
-      # - 'my-document.typ'  # Trigger when the main Typst file changes
-      - 'docs/**.typ'        # Trigger when any Typst file in the 'docs' folder changes
-      - '.github/workflows/**' # Trigger when the workflow file itself changes
+      # Trigger when any .typ file in the 'docs' folder changes
+      - 'docs/**.typ'
+      # Also trigger if the workflow or assets change
+      - 'docs/**' 
+      - '.github/workflows/**'
   pull_request:
     branches:
-      - main  # Also run on pull requests to the default branch
+      - main
     paths:
-      # ⚠️ Customize this list ⚠️
-      # - 'my-document.typ'  # Trigger when the main Typst file changes
-      - 'docs/**.typ'        # Trigger when any Typst file in the 'docs' folder changes
-      - '.github/workflows/**' # Trigger when the workflow file itself changes      
-  workflow_dispatch: # Allows manual running of the workflow
+      - 'docs/**.typ'
+      - 'docs/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
+      - name: 1. Checkout repository
         uses: actions/checkout@v4
       
-      - name: Compile Typst to PDF
-        # This action installs Typst and compiles your file(s)
-        uses: lvignoli/typst-action@main
-        with:
-          source_file: my-document.typ # ⚠️ CHANGE THIS to your Typst file name/path
+      # 2. Setup Typst CLI
+      - name: 2. Setup Typst Compiler
+        # This action installs the Typst command-line interface (CLI)
+        uses: typst-community/setup-typst@v4
+      
+      # 3. Compile ALL top-level .typ files in the docs/ folder
+      - name: 3. Compile All Documents
+        run: |
+          echo "Starting compilation of all .typ files in docs/..."
           
-      - name: Upload PDF artifact
+          # Loop through all files matching the pattern 'docs/*.typ'
+          # and run the 'typst compile' command on each one.
+          # The resulting PDFs will be placed in the current directory (root of the repo checkout).
+          
+          # Check if any matching files exist
+          shopt -s nullglob
+          typst_files=(docs/*.typ)
+          
+          if [ ${#typst_files[@]} -eq 0 ]; then
+            echo "No top-level .typ files found in the 'docs/' directory. Skipping compilation."
+            exit 0
+          fi
+          
+          for file in "${typst_files[@]}"; do
+            echo "Compiling: $file"
+            # -o $(basename "$file" .typ).pdf ensures the output PDF is placed 
+            # in the root directory and named correctly (e.g., docs/report.typ -> report.pdf)
+            typst compile "$file"
+          done
+          
+      # 4. Upload all generated PDF artifacts
+      - name: 4. Upload All Generated PDFs
         uses: actions/upload-artifact@v4
         with:
-          name: my-document-pdf
-          # ⚠️ CHANGE THIS to your desired output PDF file name
-          # The action defaults to naming the PDF after the source file:
-          path: my-document.pdf
+          # A single, consistent name for the artifact package
+          name: compiled-typst-pdfs 
+          # Finds and uploads ALL files in the root folder ending in .pdf
+          path: '*.pdf'

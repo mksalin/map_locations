@@ -103,7 +103,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }} 
           
           # 👇 CRITICAL CHANGE 1: Set the target branch to 'main'
-          publish_branch: main 
+          publish_branch: master
           
           # 👇 CRITICAL CHANGE 2: Define the target directory on the 'main' branch
           # We'll use 'pdf-output' as a simple directory name

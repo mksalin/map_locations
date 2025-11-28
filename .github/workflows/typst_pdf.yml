@@ -32,7 +32,7 @@ jobs:
         # This action installs the Typst command-line interface (CLI)
         uses: typst-community/setup-typst@v4
       
-      # 3. Compile ALL top-level .typ files in the docs/ folder
+      # 3. Compile All Documents
       - name: 3. Compile All Documents
         run: |
           echo "Starting compilation of all .typ files in docs/..."
@@ -49,13 +49,12 @@ jobs:
           for file in "${typst_files[@]}"; do
             echo "Compiling: $file"
             
-            # CRITICAL FIX: Ensure arguments are passed correctly.
             # Use 'basename' to get the filename without the directory or extension, 
             # then append .pdf to define the output file in the root directory.
             output_name=$(basename "$file" .typ).pdf
             
-            # Pass the input file, then the -o flag, and finally the output name.
-            # Note: The quotes around the variables are essential.
+            # 👇 CRITICAL FIX: Ensure the input is first, followed by the -o flag and its value.
+            # Using single quotes for the entire command can sometimes help resolve shell ambiguities.
             typst compile -- "$file" -o "$output_name"
             
             echo "Created $output_name"

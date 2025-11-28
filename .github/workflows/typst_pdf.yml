@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - main  # Set this to your default branch name (e.g., main or master)
+    paths:
+      # ⚠️ Customize this list ⚠️
+      # - 'my-document.typ'  # Trigger when the main Typst file changes
+      - 'docs/**.typ'        # Trigger when any Typst file in the 'docs' folder changes
+      - '.github/workflows/**' # Trigger when the workflow file itself changes
   pull_request:
     branches:
       - main  # Also run on pull requests to the default branch
+    paths:
+      # ⚠️ Customize this list ⚠️
+      # - 'my-document.typ'  # Trigger when the main Typst file changes
+      - 'docs/**.typ'        # Trigger when any Typst file in the 'docs' folder changes
+      - '.github/workflows/**' # Trigger when the workflow file itself changes      
   workflow_dispatch: # Allows manual running of the workflow
 
 jobs:

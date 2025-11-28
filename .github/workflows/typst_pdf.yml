@@ -57,7 +57,7 @@ jobs:
             # 👇 CRITICAL FIX: Use the most robust command syntax: 
             # typst compile <INPUT> -o <OUTPUT>
             # We use the full path for the input ($file) and the simple filename for the output ($output_name).
-            typst compile "$file" -o "$output_name"
+            typst compile "$file" -- -o "$output_name"
             
             echo "Created $output_name in the root directory."
           done

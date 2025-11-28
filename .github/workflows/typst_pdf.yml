@@ -5,19 +5,29 @@ on:
     branches:
       - main
     paths:
-      # Trigger when any .typ file in the 'docs' folder changes
-      - 'docs/**.typ'
-      # Also trigger if the workflow or assets change
+      # 🔑 CRITICAL FIX: Include all files in the docs/ folder AND the root directory
       - 'docs/**' 
-      - '.github/workflows/**'
+      - '**/*.typ' # Include all .typ files anywhere in the repo
+      - '**/*.png' # Include common assets needed by Typst
+      - '**/*.jpg'
+      - '**.csv'  # Include data files if used
+      - '.github/workflows/**' # Always watch the workflow file itself
+      - '*' # Watch any file in the root directory (e.g., README.md)
+
   pull_request:
     branches:
       - main
     paths:
-      - 'docs/**.typ'
+      # Repeat the broad path filter for pull requests
       - 'docs/**'
+      - '**/*.typ'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**.csv'
       - '.github/workflows/**'
-  workflow_dispatch:
+      - '*'
+      
+      workflow_dispatch:
 
 jobs:
   build:

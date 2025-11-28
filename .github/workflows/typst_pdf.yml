@@ -32,12 +32,11 @@ jobs:
         # This action installs the Typst command-line interface (CLI)
         uses: typst-community/setup-typst@v4
       
-      # 3. Compile All Documents
+      # 3. Compile ALL top-level .typ files in the docs/ folder
       - name: 3. Compile All Documents
         run: |
           echo "Starting compilation of all .typ files in docs/..."
           
-          # Check if any matching files exist
           shopt -s nullglob
           typst_files=(docs/*.typ)
           
@@ -48,24 +47,19 @@ jobs:
           
           for file in "${typst_files[@]}"; do
             echo "Compiling: $file"
-
+            
             # 1. Get ONLY the filename (e.g., 'my-new-doc.typ')
             base_filename=$(basename "$file")
             
             # 2. Replace .typ with .pdf to get the output name (e.g., 'my-new-doc.pdf')
             output_name="${base_filename/.typ/.pdf}"
             
-            # Use 'basename' to get the filename without the directory or extension, 
-            # then append .pdf to define the output file in the root directory.
-            # old: output_name=$(basename "$file" .typ).pdf
+            # 👇 CRITICAL FIX: Use the most robust command syntax: 
+            # typst compile <INPUT> -o <OUTPUT>
+            # We use the full path for the input ($file) and the simple filename for the output ($output_name).
+            typst compile "$file" -o "$output_name"
             
-            # 👇 CRITICAL FIX: Ensure the input is first, followed by the -o flag and its value.
-            # Using single quotes for the entire command can sometimes help resolve shell ambiguities.
-            typst compile -- "$file" -- -o "$output_name"
-            # Alternative: Place the -o flag before the input file
-            # typst compile -- -o "$output_name" "$file"
-            
-            echo "Created $output_name"
+            echo "Created $output_name in the root directory."
           done
           
       # 4. Upload All Generated PDFs (This step is now correct)

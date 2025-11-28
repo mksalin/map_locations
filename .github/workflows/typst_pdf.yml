@@ -27,7 +27,7 @@ on:
       - '.github/workflows/**'
       - '*'
       
-      workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   build:

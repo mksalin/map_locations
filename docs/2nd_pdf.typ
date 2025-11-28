@@ -4,7 +4,7 @@
 #show link: set text(fill: blue, weight: 700)
 #show link: underline
 
-= The 2nd Typst Playground - test modification
+= The 2nd Typst Playground - test modification - now it finally works !!!
 
 Welcome to the Typst Playground! This is a sandbox where you can experiment with Typst. You can type anywhere in the editor panel on the left. The preview panel to the right will update live.
 

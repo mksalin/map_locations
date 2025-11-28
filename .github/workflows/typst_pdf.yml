@@ -48,14 +48,20 @@ jobs:
           
           for file in "${typst_files[@]}"; do
             echo "Compiling: $file"
+
+            # 1. Get ONLY the filename (e.g., 'my-new-doc.typ')
+            base_filename=$(basename "$file")
+            
+            # 2. Replace .typ with .pdf to get the output name (e.g., 'my-new-doc.pdf')
+            output_name="${base_filename/.typ/.pdf}"
             
             # Use 'basename' to get the filename without the directory or extension, 
             # then append .pdf to define the output file in the root directory.
-            output_name=$(basename "$file" .typ).pdf
+            # old: output_name=$(basename "$file" .typ).pdf
             
             # 👇 CRITICAL FIX: Ensure the input is first, followed by the -o flag and its value.
             # Using single quotes for the entire command can sometimes help resolve shell ambiguities.
-            # typst compile -- "$file" -- -o "$output_name"
+            typst compile -- "$file" -- -o "$output_name"
             # Alternative: Place the -o flag before the input file
             # typst compile -- -o "$output_name" "$file"
             

@@ -1,0 +1,32 @@
+name: Build Typst PDF
+
+on:
+  push:
+    branches:
+      - main  # Set this to your default branch name (e.g., main or master)
+  pull_request:
+    branches:
+      - main  # Also run on pull requests to the default branch
+  workflow_dispatch: # Allows manual running of the workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Compile Typst to PDF
+        # This action installs Typst and compiles your file(s)
+        uses: lvignoli/typst-action@v1
+        with:
+          source_file: my-document.typ # ⚠️ CHANGE THIS to your Typst file name/path
+          
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-document-pdf
+          # ⚠️ CHANGE THIS to your desired output PDF file name
+          # The action defaults to naming the PDF after the source file:
+          path: my-document.pdf

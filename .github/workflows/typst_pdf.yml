@@ -37,10 +37,6 @@ jobs:
         run: |
           echo "Starting compilation of all .typ files in docs/..."
           
-          # Loop through all files matching the pattern 'docs/*.typ'
-          # and run the 'typst compile' command on each one.
-          # The resulting PDFs will be placed in the current directory (root of the repo checkout).
-          
           # Check if any matching files exist
           shopt -s nullglob
           typst_files=(docs/*.typ)
@@ -52,16 +48,20 @@ jobs:
           
           for file in "${typst_files[@]}"; do
             echo "Compiling: $file"
-            # -o $(basename "$file" .typ).pdf ensures the output PDF is placed 
-            # in the root directory and named correctly (e.g., docs/report.typ -> report.pdf)
-            typst compile "$file"
+            
+            # 👇 CRITICAL FIX: Use the -o flag to place the PDF in the root directory
+            # Example: docs/report.typ -> report.pdf (in the root)
+            output_name=$(basename "$file" .typ).pdf
+            
+            typst compile "$file" -o "$output_name"
+            
+            echo "Created $output_name"
           done
           
-      # 4. Upload all generated PDF artifacts
+      # 4. Upload All Generated PDFs (This step is now correct)
       - name: 4. Upload All Generated PDFs
         uses: actions/upload-artifact@v4
         with:
-          # A single, consistent name for the artifact package
           name: compiled-typst-pdfs 
-          # Finds and uploads ALL files in the root folder ending in .pdf
+          # This now correctly finds the PDFs created in the root directory
           path: '*.pdf'

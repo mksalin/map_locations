@@ -19,7 +19,7 @@ jobs:
       
       - name: Compile Typst to PDF
         # This action installs Typst and compiles your file(s)
-        uses: lvignoli/typst-action@v1
+        uses: lvignoli/typst-action@main
         with:
           source_file: my-document.typ # ⚠️ CHANGE THIS to your Typst file name/path
           
